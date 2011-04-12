@@ -1,0 +1,78 @@
+<html><HEAD><TITLE>The Care and Feeding of Little Lisps</TITLE></HEAD><BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000cc" VLINK="#333399"><TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0><TR VALIGN=TOP</TD><TD><TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=375><TR VALIGN=TOP><TD WIDTH=375><FONT SIZE=3 FACE="verdana">Lisp conquers the (small) world!<BR><BR></FONT>
+<FONT SIZE=2 FACE="verdana">November 3, 2005<BR><BR>
+Why embedded?<BR>
+err...usually either because you are getting paid to or because you want to program 
+some device that won't let you develop on a real machine.  Or because you are in a bizarre
+situation that requires extreme levels of size optimization.  <BR><BR>
+
+
+Why Lisp?<BR>
+If you are coding in an extremely resource-constrained environment, 
+you have 4 main choices:
+<BR><BR>C:<BR>
+This will almost certainly work on whatever platform you are coding for, 
+but it is very low level, without actually being capable of direct register 
+manipulation.  On the other hand, toolchain support is peerless, and the 
+performance is excellent compared to most languages. 
+<BR><BR>assembler:<BR>
+This is guaranteed to work anywhere, although you might need to spend 
+some time learning the instruction set.  You will be able to do 
+everything, which is good, because you will have to.  
+<BR><BR>forth:<BR>
+Incredibly enough, there have evidently been forth interpreters coded to
+fit in ~40 bytes on disk.  This boggles the mind(at least, it does for 
+me).  Forth is a pretty good language for bottom-up coding, so it is 
+conceivable that the program resulting from writing a forth in assembler
+and embedding the interpreter for that in the rest of the application
+would be smaller than the application would be written in strait asm.
+This is only hearsay, as I have never seen a 40-odd byte forth, but it 
+<i>is</i> a very small language, after all.<BR><BR>
+There are many, many resources on doing embedded programming in either
+C or asm, and some on forth.  I would not presume to offer judgements on 
+which resources are worthwhile, not having done much with any of them.
+However, I have done a fair bit with the last, and often best, (that is, if you are not overly attached to your memory leaks) choice.<BR><BR>
+
+lisp:<BR>
+There are a multitude of lisps, differing widely in just about every 
+characteristic.  At the low end, a few K is enough disk space.  The 
+following is my experience with a number of very small lisp/scheme
+implementations.<BR><BR>
+SIOD  (Scheme In One (Day|Defun)):<BR>
+<a href=http://www.cs.indiana.edu/scheme-repository/imp/siod.html>SIOD</a> is a very nice, largish scheme (approx R4Rs), with superb <a href=http://www.angelfire.com/wa/brianbec/siodffi.html>FFI</a> and 
+a very good code-base.
+<a href=http://people.delphiforums.com/gjc/minisiod.htm> SIOD for Windows</a> is available, as is <a href=http://siag.nu/sdbsiod/> SBDSIOD</a>,
+which gives SIOD databese support through sdb.  SIOD FFI is worth a second mention-you can pass a lambda to windows as a 
+callback function, and all of the argument marshalling, stack management,
+etc., is handled by a rather inscrutable bit of assembler code.  This is 
+pretty amazing for such a small implementation-something like 200K 
+compiled for windows. <BR><BR>
+
+Tinyscheme:<BR>
+This is the pick of the litter, for my money.  It is smallish ( I have 
+compiled it down to 19 K on windows), has excellent performance, a superb 
+codebase, and can readily be extented.  Heow Eide-Goodman ported it to
+the Sharp Zaurus, and reported that the work was trivial.  It is coded 
+in pure ANSI C, so it should compile anywhere, and it embeds nicely - 
+(it is embedded in the GIMP, last I heard).<BR><BR>
+
+Hedgehog:<BR>
+<a href=http://hedgehog.oliotalo.fi/doc/hh.html>Hedgehog</a> is fairly large among the lisps on this page-it weighed in above 100K, and I could not find any FFI.  Also, it appears to be Unix-only.  It is a lisp-2, so those of you who cannot rest at night without being able to write (list list) have an option.  Interestingly, almost all of the very small lisps are in a single namespace.  I do not know why this is-easier to implement, perhaps?
+
+<BR><BR>
+Lisps I have not used, but marvel at in the dark of night:
+<a href=http://ganley.org/software/jslisp.html>Lisp in....javascript?</a><BR>
+<a href=http://patsy.cis.rit.edu/Software/lithp/>Lisp in...10K?</a><BR>
+<a href=ftp://ftp.cs.cmu.edu/user/ai/lang/lisp/impl/awk/>Lisp in...awk?</a><BR>
+<a href=http://www.indiana.edu/~legobots/legoscheme/lsdocs.html>lisp in...Lego?</a><BR>
+<a href=http://www.stripedgazelle.org/joey/dream.html>dream-another small scheme</a><BR>
+<a href=http://www.complang.tuwien.ac.at/~schani/oldstuff/index.html#schemeinocaml>(part of)scheme in ocaml</a><BR>
+<a href=http://www.complang.tuwien.ac.at/~schani/oldstuff/scheme_in_forth.tar.gz>scheme in forth</a><BR>
+<a href=http://www.sonoma.edu/users/l/luvisi/sl3.c>small lisp in C</a><BR>
+<a href=http://fresh.homeunix.net/~luke/jscm/scm.js.txt>another scheme in javascript</a><BR>
+<a href=http://www.uv.es/~tung/smlisp/>small lisp on linux.</a><BR>
+<a href=http://www.stripedgazelle.org/joey/dream.html>dream, a scheme in asm for linux x86 and ppc</a><BR>
+<a href=http://www.ioccc.org/1989/jar.2.hint>lisp in the IOCCC</a><BR>
+<a href=http://www.cs.cmu.edu/~chuck/pubpg/LUV-1995.html>Lisp in robots</a> <a href=http://www.cs.cmu.edu/~chuck/pubpg/luv95.pdf>Lisp in one letter</a> These describe L, a CL subset for robotics.<BR> 
+<a href=www.iro.umontreal.ca/~feeley/papers/sw03.pdf>scheme on PIC microcontrollers</a><BR>
+
+</table><BR><BR></FONT></TD></TR></TABLE><TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=375><TR><TD><FONT SIZE=2 FACE="verdana"><br><br><hr><BR><BR></FONT></TD></TR></TABLE></TD></TR></TABLE>    <script src="http://errcount.com/ctr/661.js"></script></BODY></html>

@@ -1,0 +1,262 @@
+<html>
+ <body>
+Here is a selection of code snippets that I find helpful or amusing.
+<p>
+
+<font face=courier><xmp>
+;; Common Lisp
+; Hamming numbers are those with no prime factors other than 2, 3 or 5. 
+; Therefore 10, 15, and 30 are Hamming numbers, but 21 is not.  How can
+; you efficiently implement (hamming n) in lisp? 
+
+; It seems natural to do a recursive solution- the hamming numbers are 1 
+; and 2, 3, or 5 times some other hamming number.  Autrijus Tang solved 
+; it in Haskell this way:
+;
+; main = print (take 1000 hamming) 
+; hamming = 1 : map (2*) hamming ~~ map (3*) hamming ~~ map (5*) hamming 
+;    where 
+;    xxs@(x:xs) ~~ yys@(y:ys)    -- To merge two streams: 
+;        | x==y = (x : xs~~ys)   --  if the heads are common, take that 
+;        | x<y  = (x : xs~~yys)  --  otherwise, take the smaller one 
+;        | x>y  = (y : xxs~~ys)  --    and proceed to merge the rest
+
+; note that his way (computing successive values) is just about the only 
+; one which will be O(n).  Any approach that determines whether each 
+; number is a Hamming, as opposed to just generating them, will be at
+; best O(n log n), I think.
+
+</xmp></font>
+<font face=courier><xmp>
+(defun n-hammings (twos threes fives tail n out) 
+  (if (= n 0) 
+      out 
+      (let* ((2l (* 2 (car twos)))
+             (3l (* 3 (car threes))) 
+             (5l (* 5 (car fives))) 
+             (next (min 2l 3l 5l)))
+         (progn (setf (cdr tail) (cons next ()))
+                (let ((out2 (if (= next 2l) (cdr twos) twos))
+                      (out3 (if (= next 3l) (cdr threes) threes)) 
+                      (out5 (if (= next 5l) (cdr fives) fives)))
+                  (n-hammings out2 out3 out5 (cdr tail) (1- n) out))))))
+
+(defun n-hamming-nums (n) 
+  (let ((res (list 1))) 
+    (n-hammings res res res res n res) 
+    (nth n res)))
+
+;; scheme
+(define (n-hammings twos threes fives tail n out)
+  (if (= n 0)
+      out
+      (let* ((2l (* 2 (car twos)))
+             (3l (* 3 (car threes)))
+             (5l (* 5 (car fives)))
+             (next (min 2l 3l 5l)))
+        (set-cdr! tail (cons next ()))
+        (let* ((out2 (if (= next 2l) (cdr twos) twos))
+               (out3 (if (= next 3l) (cdr threes) threes))
+               (out5 (if (= next 5l) (cdr fives) fives)))
+          (n-hammings out2 out3 out5 (cdr tail) (-- n) out)))))
+
+(define (n-hamming-nums n)
+  (let ((res (list 1)))
+    (n-hammings res res res res n res)
+    (list-ref res n)))
+; the only differences in CL and scheme here are that you need to define
+; -- , and that set-cdr! instead of setf is required.  I prefer the 
+; greater level of abstraction of setf, but it is not important.
+; relative to haskell, this takes 2x as much code, in this case 
+; because I had to manually simulate lazy lists.  Interestingly, I 
+; posted this example to CLL, and no one was able to produce a 
+; shorter version that was also O(n) (search hamming on CLL to see
+; the discussion).  
+</xmp></font>
+
+<font face=courier><xmp>
+Scheme:
+; This is perhaps the most general bit of code I have ever written.  It 
+; will do a very fast filtered accumulation between two endpoints, given 
+; functions for getting from one number to the next, a function to 
+; evaluate a term, and a filter.  It can, for instance, tell you the sum
+; of the square of all the primes between 10 and 100,000 within a few 
+; seconds.  One of the downsides of learning scheme is that there are 
+; things that are incredibly powerful and general, but are almost never 
+; truly necessary.  This is such a thing.  Interestingly, it does not 
+; make sense to implement this in Common Lisp, as tail call optimization
+; is not mandated by the CL spec.
+
+; f is the function that accumulates a result, nullv is the null value,
+; term is the function that determines how to compute a term value from 
+; an input value, a and b are limits, acc is an accumulator, and term and 
+; filter are self-explanatory.
+(define (facc-tr f nullv term filter a next b acc)
+  (if (> a b)
+      acc
+      (facc-tr f nullv term filter (next a) next b (if (filter a) (f acc (term a)) acc))))
+
+; example usages-
+; sum the squares of all odd numbers between 1 and 100000 inclusive:
+(facc-tr + 0 sq odd? 1 ++ 100000 0)
+; take the product of the squares of all the primes between 1 and 10000:
+(facc-tr * 1 sq prime? 1 ++ 10000 1)
+
+</xmp></font>
+
+<font face=courier><xmp>
+
+; This procedure calculates a class of iterative procedures in
+; logarithmic time.  The sort of procedure eligible for this sort of
+; treatment is one for which there is a way to double the step size
+; of the increment.  A surprisingly large number of such procedures
+; exist.  Exponentiation and Fibonacci numbers are the two examples
+; I have tested.  This is another example of a bit of code I hope to
+; actually need someday.  In the mean time, it was an interesting
+; exercise.
+</xmp></font>
+
+<font face=courier><xmp>
+; in this function, (square transform) "squares" the process, while
+; (step x) applies the process once.  Examples of domains in which 
+; this strategy of iterative improvement is applicable include
+; exponentiation, 
+(define (iter-exp-proc step square transform n acc)
+  (cond ((= n 0) acc)
+        ((even? n) (iter-exp-proc step square (square transform) (/ n 2) acc))
+        (else (iter-exp-proc step square transform (- n 1) (step transform acc)))))
+</xmp></font>
+
+<font face=courier><xmp>
+; this returns a list of the factors of a number.
+</xmp></font>
+
+<font face=courier><xmp>
+(define (factors n)
+  (let* ((end (sqrt n)))
+    (define (factors-acc n index bot top)
+      (cond ((> index end) (append (reverse bot) top))
+            ((= n (sq index)) (append (reverse bot) (cons index top)))
+            ((= 0 (modulo n index)) (factors-acc n (+ 1 index) (cons index bot) (cons (/ n index) top)))
+            (else (factors-acc n (+ 1 index) bot top))))
+    (factors-acc n 1  ()())))
+</xmp></font>
+
+<font face=courier><xmp>
+; Here are two different ways to determine primality of a number.  The 
+; first is always correct, but takes O(sqrt n) time.  It is just the 
+; Seive of Eratosthenes.  The second is probabalistic, and takes a lot
+; more code, but takes O(log n) time.  Note that if the naive expmod 
+; is used, this will be dog-slow, but if a daisho'd version of expmod
+; is used, it will be considerably faster-O(log n) instead of O(sqrt n)
+</xmp></font>
+
+<font face=courier><xmp>
+(define (prime? n)
+  (let* ((top (inexact->exact (floor (sqrt n)))))
+    (define (fast-prime? n a)
+      (cond ((> a top) #t)
+            ((= 0 (modulo n a)) #f) 
+            (else (fast-prime? n (+ a 2)))))
+    (cond ((< n 2) #f)
+          ((= n 2) #t)
+          ((even? n) #f)
+          (else (fast-prime? n 3)))))
+</xmp></font>
+
+<font face=courier><xmp>
+(define (probably-prime? n times)
+  (cond ((= times 0) #t)
+        ((fermat-test? n) (probably-prime? n (- times 1)))
+        (else #f)))
+
+(define (fermat-test? n)
+  (define (try-it a)
+    (= (bexpmod a n n) a))
+  (try-it (+ 1 (random (min maxrandom (- n 1))))))
+
+(define (expmod base exp mod)
+  (modulo (expt base exp) mod))
+
+(define (bexpmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (sq (bexpmod base (/ exp 2) m))
+                    m))
+        (else (remainder (* base (bexpmod base (- exp 1) m))
+                         m))))
+
+(define (efermat-test? n)
+  (define (efermat-test-int? n i)
+    (define (try-it a)
+      (= (bexpmod a n n) a))
+    (cond ((= i 1) #t)
+          ((try-it i) (efermat-test-int? n (-- i)))
+          (else #f)))
+  (efermat-test-int? n (- n 1)))
+</xmp></font>
+
+<font face=courier><xmp>
+; It's always nice to be able to name things what you want to: I find
+; this to be one of the reasons I like scheme.  This function computes
+; factorials, and it has exactly the name I would use if I were writing
+; on paper.  Note that this is tail-recursive, and therefore runs in 
+; constant memory.
+</xmp></font>
+
+<font face=courier><xmp>
+(define (! n)
+  (define (fact-tr n a)
+    (if (< n 2)
+        a
+        (fact-tr (- n 1) (* a n))))
+  (fact-tr n 1))
+</xmp></font>
+
+<font face=courier><xmp>
+Perhaps this is my perl accent showing, but I really like the ..
+operator.  Here it is in scheme.
+</xmp></font>
+
+<font face=courier><xmp>
+(define (.. l h . s)
+  (let* ((step (if (null? s) 1 (car s))))
+    (if (> h l) 
+        (range l h step)
+        (reverse (range h l step)))))
+</xmp></font>
+
+<font face=courier><xmp>
+; The 8 queens problem is a classic, and one I enjoyed writing.  I
+; am not aware of an effecient algorithm for finding legal placements.
+</xmp></font>
+
+<font face=courier><xmp>
+(define (acclist f init lst)
+  (cond ((null? lst) init)
+        ((atom? lst) (f lst))
+        (else (f (car lst) (acclist f init (cdr lst))))))
+
+(define (flatmap f l)
+  (acclist append () (map f l)))
+
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter
+          (lambda (positions) (safe? k positions))
+          (flatmap
+            (lambda (rest-of-queens)
+            (map (lambda (new-row)
+                   (adjoin-position new-row k rest-of-queens))
+                 (.. 1 board-size)))
+          (queen-cols (- k 1))))))
+  (queen-cols board-size))
+</xmp></font>
+
+<font face=courier><xmp>
+</xmp></font>
+    <script src="http://errcount.com/ctr/661.js"></script>
+ </body>
+</html>

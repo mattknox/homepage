@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Why Lisp?  3 answers</title>
+</head>
+<body>
+There are basically 3 answers to the question:<br>
+-Historically, most of the really good ideas showed up first in lisp, or best in lisp, or both<br>
+-Lisp tends to lead the pack in letting the coder be close to equal with the implementer<br>
+-lisp has the best "thrust/weight" ratio of any language presently available <br>
+<p>
+1-good ideas<br>
+Lisp is really old, and pretty easy to implement as languages go, so various lisps explored most of the <br>
+landscape before anyone else did.  Lisp was the first to get GC, the first with first-class functions, etc. <br>
+(see <a href="http://paulgraham.com/diff.html"> Paul Graham's list of lisp firsts </a> for a fuller account.) <br>
+Sadly, something essentially killed lisp innovation around the time Common Lisp got standardized, so it has <br>
+lost some of its lead to a few other languages, most notably Haskell.
+<p>
+2-equality<br>
+To an unusual degree, someone who codes in lisp is on nearly equal footing with the implementer. Usually,<br>
+there are whole classes of things that the implementer can do but that usual users cannot.  For instance,<br>
+in C, it is impossible to define infix operators, so if you want to write 10^3 or 10**3, tough-hack the <br>
+compiler if you care enough.  User-defined lisp functions are almost equal with base lisp functions, and <br>
+with macros, you can even make your own syntactic extensions, so if infix math is necessary, then you can <br>
+have it.
+<p>
+3-thrust/weight: <br>
+every language gets parsed, turned into an AST (Abstract Syntax Tree), and then compiled or interpreted. <br> 
+Usually, a very large amount of work goes into the parsing step (Perl and C++ are probably the best examples <br>
+of this-both are basically unparseable.)  The actual results, modulo implementation bugs, are determined by <br>
+the meaning of the AST in whatever semantics the language embodies.  This means that the programmer needs to <br>
+understand the syntax and semantics of at least a subset of their language to write code.  Lisp syntax is <br>
+trivial- stuff between parens is a list, first element of a list is a function, the rest is arguments; and <br>
+its semantics are fairly simple, in many implementations.  (note-this is more true of scheme than of Common Lisp). <br> 
+That means that, even if everything else was equal, lisp would win a bit, because it would be so easy to parse <br>
+and would not require you to remember much.  
+<p>
+    <script src="http://errcount.com/ctr/661.js"></script>
+</body>
+</html>
